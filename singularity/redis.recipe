@@ -1,0 +1,36 @@
+Bootstrap: docker
+From: centos:7.3.1611
+
+%labels
+  AUTHOR "simotrone@gmail.com"
+  VERSION  "0.2"
+
+%help
+  Redis server 3.2.12
+  Need mount /var/lib/redis /var/log/redis /var/run on host.
+  $ singularity instance.start -B lib:/var/lib/redis -B log:/var/log/redis -B run:/var/run/ redis2.simg redis
+
+%post
+  yum -y install epel-release vim wget
+  yum -y install redis
+  # yum -y update
+
+%startscript
+  # redis
+  echo "starting redis"
+  EXIT=0
+  for dir in /var/lib/redis /var/log/redis /var/run; do
+    touch $dir/write_test
+    if [ ! -f $dir/write_test ]; then
+      echo "$dir/ is not writable. Bind it to host directory."
+      EXIT=1
+    else
+      rm -f $dir/write_test
+    fi
+  done
+  [ $EXIT -ne 0 ] && exit 1
+  # see singularity logs in /tmp
+
+  # launch redis-server
+  echo "Start redis-server"
+  /usr/bin/redis-server &

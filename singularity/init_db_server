@@ -1,0 +1,5 @@
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('my-secret-pw');
+CREATE USER 'simple'@'localhost' IDENTIFIED BY 'my-simple-pw';
+CREATE DATABASE IF NOT EXISTS local_db;
+GRANT ALL PRIVILEGES ON local_db.* TO 'simple'@'%';
+DROP DATABASE IF EXISTS test;

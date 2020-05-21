@@ -1,0 +1,41 @@
+Bootstrap: docker
+From: centos:7.3.1611
+
+%labels
+  AUTHOR "simotrone@gmail.com"
+  VERSION  "0.4"
+
+%help
+  Apache - httpd server 2.4.6
+  # Need mount /var/lib/redis /var/log/redis /var/run on host.
+  # $ singularity instance.start -B lib:/var/lib/redis -B log:/var/log/redis -B run:/var/run/ redis2.simg redis
+  $ singularity instance.start -B run:/var/run/ -B log:/var/log apache.simg apache
+
+%post
+  yum -y install httpd less vim wget
+  sed -e '/^Listen 80/ s/^/# /' -i /etc/httpd/conf/httpd.conf
+  cat <<EOF >> /etc/httpd/conf.d/local.conf
+ServerName 127.0.0.1
+Listen 8080
+EOF
+
+%startscript
+  # apache
+  echo "starting apache"
+  EXIT=0
+  for dir in /var/log/httpd /var/run/httpd; do
+    mkdir -p $dir
+    touch $dir/write_test
+    if [ ! -f $dir/write_test ]; then
+      echo "$dir/ is not writable. Bind it to host directory."
+      EXIT=1
+    else
+      rm -f $dir/write_test
+    fi
+  done
+  [ $EXIT -ne 0 ] && exit 1
+  # see singularity logs in /tmp
+
+  # launch apache
+  echo "Start apache"
+  /usr/sbin/httpd &
