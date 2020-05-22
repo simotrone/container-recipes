@@ -3,14 +3,14 @@
 ### Building / Installation:
 
 * copy the recipe in $dir
-* wget -P $dir/vendor http://ds9.si.edu/download/source/ds9.8.1.tar.gz
-* sudo singularity build ds9 ds9.recipe
+* `wget -P $dir/vendor http://ds9.si.edu/download/source/ds9.8.1.tar.gz`
+* `sudo singularity build ds9 ds9.recipe`
   Note: the build process can require mins (t < 5 min)
 * use it!
 
 ### What you can do?
 
-* singularity help ds9
+* `singularity help ds9`
 * [ds9 docs](https://sites.google.com/cfa.harvard.edu/saoimageds9/documentation)
 
 ### Note
