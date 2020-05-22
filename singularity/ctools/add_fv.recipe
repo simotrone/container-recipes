@@ -1,0 +1,29 @@
+BootStrap: localimage
+From: base_container.simg
+
+%labels
+  author "simotrone@gmail.com"
+  version "1.0"
+
+%setup
+  wget -nc -P /tmp/vendors https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/fv/fv5.5.2_Linux.tar.gz
+
+%files
+  /tmp/vendors/fv5.5.2_Linux.tar.gz /usr/local/src
+
+%post
+  SRC_DIR="/usr/local/src"
+
+  cd $SRC_DIR
+  tar xzf fv5.5.2_Linux.tar.gz
+  cd fv5.5.2
+  mv fv       /usr/local/bin/
+  mv Tix8.4.3 /usr/local/bin/
+  mv xpabin   /usr/local/bin/
+  mkdir /usr/local/share/fv
+  mv *  /usr/local/share/fv/
+
+  yum -y install libXScrnSaver
+
+  # cleanup
+  rm -r $SRC_DIR/{fv5.5.2,fv5.5.2_Linux.tar.gz}

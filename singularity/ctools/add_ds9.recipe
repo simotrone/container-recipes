@@ -1,0 +1,113 @@
+BootStrap: localimage
+From: base_container.simg
+
+%labels
+  author "simotrone@gmail.com"
+  version "1.6"
+
+%setup
+  # if host has no wget, comment %setup section, download the source, put it
+  # in /tmp/vendors/ path and let %files section goes alone. :-)
+  wget -nc -P /tmp/vendors http://ds9.si.edu/download/source/ds9.8.1.tar.gz
+
+%files
+  /tmp/vendors/ds9.8.1.tar.gz /usr/local/src
+
+%post
+  # Add mandatory packages...
+  yum -y install make gcc gcc-c++ binutils
+  yum -y install zlib-devel libxml2-devel libxslt-devel autoconf libX11-devel tcl zip
+  SRC_DIR="/usr/local/src"
+
+  cd $SRC_DIR
+  tar xzf ds9.8.1.tar.gz
+  cd SAOImageDS9
+  unix/configure
+  make 
+
+  cp bin/ds9 /usr/local/bin/
+
+  # cleanup
+  rm -r $SRC_DIR/*
+
+%runscript
+  exec ds9 "$@"
+
+%help
+  Singularity container for SAOImage DS9.
+
+  DS9 is an image display and visualization tool for astronomical data.
+  https://sites.google.com/cfa.harvard.edu/saoimageds9/home
+
+
+  Execute ds9:
+
+    singularity run $image
+    singularity run $image skymap.fits -region onoff_on.reg
+
+
+  Example apps:
+
+    singularity apps $image                 # list the apps in the container
+
+    singularity run --app crab $image       # run the "crab" app in container
+    singularity run --app pillars $image
+    singularity run --app cassiopea $image
+    singularity help --app crab $image      # read a description of single app
+
+%apprun cassiopea
+  ds9 -rgb \
+      -red -url http://ds9.si.edu/download/data/casa_low.fits -log -smooth \
+      -green -url http://ds9.si.edu/download/data/casa_mid.fits -log -smooth \
+      -blue -url http://ds9.si.edu/download/data/casa_high.fits -log -smooth
+
+%apphelp cassiopea
+  "This RGB composite image shows a beautiful X-ray view of Cassiopeia A
+  (Cas A), a supernova remnant located in our Galaxy about 11,000 light years
+  away. These are the remains of a massive star that exploded about 330 years
+  ago, as measured in Earth's time frame. At the center of the image is a
+  neutron star, an ultra-dense star created by the supernova.
+
+  In this RGB composite the low energy X-rays from Chandra are shown in red,
+  mid range energy X-rays are shown in green and high energy X-rays are shown
+  in blue.
+
+  Data Credits: NASA/CXC
+  https://sites.google.com/cfa.harvard.edu/saoimageds9/gallery"
+
+%apprun crab
+  ds9 -rgb \
+      -red -url http://ds9.si.edu/download/data/crab_2mass.fits -scale mode 99 \
+      -green -url http://ds9.si.edu/download/data/crab_chandra.fits -scale linear \
+      -blue -url http://ds9.si.edu/download/data/crab_dss2.fits -scale linear
+
+%apphelp crab
+  "The Crab Nebula is the remnant of a supernova explosion that was seen on
+  Earth in 1054 AD. It is 6000 light years from Earth. At the center of the
+  bright nebula is a rapidly spinning neutron star, or pulsar that emits pulses
+  of radiation 30 times a second.
+
+  This RGB composite image is composed from data at three different
+  wavelengths. Infared data from 2MASS displayed in red, X-Ray data from Chandra
+  displayed in green, and optical data from DSS2 displayed  in blue.
+
+  Data Credits: NASA/2MASS/CXC/DSS2
+  https://sites.google.com/cfa.harvard.edu/saoimageds9/gallery"
+
+%apprun pillars
+  ds9 -rgb \
+      -red -url http://ds9.si.edu/download/data/673nmos.fits -zscale \
+      -green -url http://ds9.si.edu/download/data/656nmos.fits -zscale \
+      -blue -url http://ds9.si.edu/download/data/502nmos.fits -zscale -rotate 270 -zoom to fit
+
+%apphelp pillars
+  "At the center of the Eagle Nebula, towers of dust and gas form the stunning
+  feature known as the 'Pillars of Creation'.
+
+  Imaged by Hubble's WFPC2 camera, this RGB composite image is composed of
+  lower frequency optical data in red, mid range frequency optical data in
+  green, and higher frequency optical data in blue.
+
+  Data Credits: NASA/STSci
+  https://sites.google.com/cfa.harvard.edu/saoimageds9/gallery"
+
