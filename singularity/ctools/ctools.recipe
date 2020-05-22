@@ -1,0 +1,100 @@
+BootStrap: docker
+From: centos:7.3.1611
+
+%labels
+  # container metadata
+  author "simotrone@gmail.com"
+  version "1.4"
+
+%setup
+  # executed before %post section
+  # do things in host system after container OS is installed
+  VENDORS="http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.48.tar.gz
+      http://cta.irap.omp.eu/ctools/releases/gammalib/gammalib-1.6.3.tar.gz
+      http://cta.irap.omp.eu/ctools/releases/ctools/ctools-1.6.3.tar.gz"
+  wget -nc -P /tmp/vendors $VENDORS
+
+%files
+  # executed before %post section
+  # copy files from host to container before %post section
+  /tmp/vendors/cfitsio-3.48.tar.gz    /usr/local/src
+  /tmp/vendors/ctools-1.6.3.tar.gz    /usr/local/src
+  /tmp/vendors/gammalib-1.6.3.tar.gz  /usr/local/src
+
+%environment
+  # env variables sourced at runtime, NOT a build time
+  # env at build time in %post
+  export GAMMALIB=/usr/local/gamma
+  source $GAMMALIB/bin/gammalib-init.sh
+  export CTOOLS=/usr/local/gamma
+  source $CTOOLS/bin/ctools-init.sh
+  # python3 virtual env activation
+  source /usr/local/bin/activate
+
+%post
+  # Add mandatory packages...
+  yum -y install make gcc gcc-c++ binutils ncurses-devel readline-devel \
+                 bzip2 libXft libcurl-devel gcc-gfortran python3 python3-devel swig3
+  # Add optional packages...
+  yum -y install curl less vim wget
+
+  SRC_DIR="/usr/local/src"
+
+  # python 3 env creation and activation
+  cd $SRC_DIR
+  python3 -m venv /usr/local
+  source /usr/local/bin/activate
+
+  # CFitsio
+  cd $SRC_DIR
+  tar xzf cfitsio-3.48.tar.gz
+  cd cfitsio-3.48
+  ./configure --prefix=/usr/local/gamma
+  make shared
+  make install
+
+  # gammalib
+  cd $SRC_DIR
+  tar xfz gammalib-1.6.3.tar.gz
+  cd gammalib-1.6.3
+  ./configure
+  make
+  make check
+  make install
+
+  export GAMMALIB=/usr/local/gamma
+  source $GAMMALIB/bin/gammalib-init.sh
+
+  # ctools
+  cd $SRC_DIR
+  tar xfz ctools-1.6.3.tar.gz
+  cd ctools-1.6.3
+  ./configure
+  make
+  make check
+  make install
+
+  # cleanup
+  rm -r $SRC_DIR/*
+
+%runscript
+  echo "no script or app to run."
+  echo "use shell command!"
+
+%help
+  Singularity container to use ctools and gammalib.
+
+  IRAP institute: http://cta.irap.omp.eu/
+
+  This container was developed to use the ctools framework via shell:
+
+    singularity shell $image
+
+  and inside the shell run ctobssim, ctlike, etc.
+
+    singularity exec $image python --version
+    singularity exec $image csinfo info
+
+  To force safe $HOME, use:
+
+    singularity shell -H /my/full/path/to/safe/home $image
