@@ -1,4 +1,4 @@
-# Build a singularity container for SAO ds9.
+# Build a singularity container for SAO ds9
 
 ### Building / Installation:
 
@@ -17,7 +17,7 @@
 
 * the container apps want to show the potential of ds9 as illustrated in
   [Gallery section](https://sites.google.com/cfa.harvard.edu/saoimageds9/gallery).
-  The fits file are fetched online, so you need internet connection.
+  The fits files are fetched from remote, so you need internet connection.
 
 ### Using the container
 
@@ -25,3 +25,10 @@
 
 ![Analyzing a skymap](assets/using_ds9.png)
 
+## Credits
+
+Credits go to:
+
+* people developed SAOImage DS9 software
+* astro teams that provided the fits file (NASA and other, as stated in app
+  help).
