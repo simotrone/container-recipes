@@ -4,7 +4,7 @@ From: centos:7.3.1611
 %labels
   # container metadata
   author "simotrone@gmail.com"
-  version "1.4"
+  version "1.6"
 
 %setup
   # executed before %post section
@@ -24,17 +24,21 @@ From: centos:7.3.1611
 %environment
   # env variables sourced at runtime, NOT a build time
   # env at build time in %post
+  SINGULARITY_SHELL="/bin/bash"
+
   export GAMMALIB=/usr/local/gamma
   source $GAMMALIB/bin/gammalib-init.sh
   export CTOOLS=/usr/local/gamma
   source $CTOOLS/bin/ctools-init.sh
+
   # python3 virtual env activation
   source /usr/local/bin/activate
 
 %post
   # Add mandatory packages...
   yum -y install make gcc gcc-c++ binutils ncurses-devel readline-devel \
-                 bzip2 libXft libcurl-devel gcc-gfortran python3 python3-devel swig3
+                 bzip2 libXft libcurl-devel gcc-gfortran python3 python3-devel swig3 \
+                 python3-tkinter
   # Add optional packages...
   yum -y install curl less vim wget
 
@@ -74,8 +78,19 @@ From: centos:7.3.1611
   make check
   make install
 
+  # python libs install MUST run later than ctools (ctools make check fails)
+  # FIXME I don't know why, at the moment.
+  pip install --upgrade pip
+  pip install matplotlib numpy
+  # matplotlib and numpy are used in ctools scripts (in example dir).
+  # matplotlib requires python3-tkinter (see yum mandatory packages)
+
   # cleanup
   rm -r $SRC_DIR/*
+
+  # this works with the SINGULARITY_SHELL setting in %environment
+  echo 'export PS1="Singularity \u@${SINGULARITY_NAME}:\W> "' >> /.singularity.d/env/99-base.sh
+
 
 %runscript
   echo "no script or app to run."
