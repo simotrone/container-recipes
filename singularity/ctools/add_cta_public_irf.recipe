@@ -1,0 +1,21 @@
+BootStrap: localimage
+From: base_container.simg
+
+%setup
+  # CTA IRF for improved performance: http://www.cta-observatory.org/science/cta-performance/
+  wget -nc -P /tmp/vendors https://www.cta-observatory.org/wp-content/uploads/2019/04/CTA-Performance-prod3b-v2-FITS.tar.gz
+  wget -nc -P /tmp/vendors http://www.cta-observatory.org/wp-content/uploads/2017/12/CTA-Performance-prod3b-v1-FITS1.tar.gz
+
+%files
+  /tmp/vendors/CTA-Performance-prod3b-v2-FITS.tar.gz /usr/local/src
+  /tmp/vendors/CTA-Performance-prod3b-v1-FITS1.tar.gz /usr/local/src
+
+%post
+  SRC_DIR="/usr/local/src"
+
+  cd $SRC_DIR
+  tar -x -f CTA-Performance-prod3b-v2-FITS.tar.gz  --gzip --directory=/usr/local/gamma/share/
+  tar -x -f CTA-Performance-prod3b-v1-FITS1.tar.gz --gzip --directory=/usr/local/gamma/share/
+
+  # cleanup
+  rm -r $SRC_DIR/CTA-Performance-prod3b*tar.gz
